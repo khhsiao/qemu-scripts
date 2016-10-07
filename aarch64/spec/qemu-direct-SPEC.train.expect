@@ -1,0 +1,105 @@
+#! /usr/bin/expect --
+#
+# Run qemu-system and check we can boot and shutdown
+#
+
+if {[llength $argv] == 0} {
+    send_user "Usage: qemu-run-SPEC.expect <qemu invocation>\n"
+}
+
+########## Boot QEMU guest Linux & Login as "root" ##########
+set timeout 60
+spawn {*}$argv
+set pid [exp_pid]
+
+expect {
+    "buildroot login: " { send -- "root\r"}
+    timeout { send_error "# boot failed "; exit 1 }
+}
+
+#--------- Before SPEC ---------#
+set timeout 10
+
+expect "# "
+send -- "mkdir -p /data/benchmarks/SPEC/cpu2006_v1.1_aarch64\r"
+expect "# "
+send -- "mount -t 9p -o trans=virtio r /data/benchmarks/SPEC/cpu2006_v1.1_aarch64\r"
+expect "# "
+send -- "cd /data/benchmarks/SPEC/cpu2006_v1.1_aarch64\r"
+expect "# "
+send -- "source shrc\r"
+expect "# "
+
+########## Run SPEC CINT2006 benchmark ##########
+
+set timeout -1
+send -- "cd benchspec/CPU2006\r"
+
+set prefix run/run_base_train_aarch64-m64-gcc53-nn
+
+proc invoke_return {} {
+    global pid;
+    expect {
+        "# " { system kill -USR1 $pid; send -- "specinvoke\r" }
+    }
+    expect {
+        "# " { system kill -USR1 $pid; send -- "cd ../../../\r" }
+    }
+}
+
+expect "# "
+send -- "cd 400.perlbench/$prefix.0004\r"
+invoke_return
+
+expect "# "
+send -- "cd 401.bzip2/$prefix.0004\r"
+invoke_return
+
+expect "# "
+send -- "cd 403.gcc/$prefix.0004\r"
+invoke_return
+
+expect "# "
+send -- "cd 429.mcf/$prefix.0004\r"
+invoke_return
+
+expect "# "
+send -- "cd 445.gobmk/$prefix.0004\r"
+invoke_return
+
+expect "# "
+send -- "cd 456.hmmer/$prefix.0004\r"
+invoke_return
+
+expect "# "
+send -- "cd 458.sjeng/$prefix.0004\r"
+invoke_return
+
+expect "# "
+send -- "cd 462.libquantum/$prefix.0004\r"
+invoke_return
+
+expect "# "
+send -- "cd 464.h264ref/$prefix.0004\r"
+invoke_return
+
+expect "# "
+send -- "cd 471.omnetpp/$prefix.0004\r"
+invoke_return
+
+expect "# "
+send -- "cd 473.astar/$prefix.0004\r"
+invoke_return
+
+expect "# "
+send -- "cd 483.xalancbmk/$prefix.0004\r"
+invoke_return
+
+########## Poweroff QEMU guest Linux ##########
+expect "# "
+send -- "poweroff\r"
+
+expect "reboot: Power down"
+expect eof
+
+exit 0

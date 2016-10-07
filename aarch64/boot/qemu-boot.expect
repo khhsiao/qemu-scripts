@@ -1,0 +1,33 @@
+#! /usr/bin/expect --
+#
+# Run qemu-system and check we can boot and shutdown
+#
+
+if {[llength $argv] == 0} {
+    send_user "Usage: qemu-boot.expect <qemu invocation>\n"
+}
+
+set timeout 60
+spawn {*}$argv
+set pid [exp_pid]
+
+# expect eof
+# exit 0
+
+expect {
+    "buildroot login: " { send -- "root\r" }
+    timeout { send_error "# boot failed "; exit 1 }
+}
+
+set timeout 10
+
+expect "# "
+send -- "uname -a\r"
+
+expect "# "
+send -- "poweroff\r"
+
+expect "reboot: Power down"
+expect eof
+
+exit 0
