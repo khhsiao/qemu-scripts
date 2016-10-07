@@ -1,2 +1,3 @@
-# espt
-Embedded Shadow Page Table
+# QEMU system mode emulation test scripts
+
+Scripts to run QEMU automatically.
