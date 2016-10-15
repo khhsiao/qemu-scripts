@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /bin/sh
 #
 # This script use "qemu-boot.sh" to boot QEMU for $ITERATION times
 
@@ -13,5 +13,5 @@ while [ $a -lt $ITERATION ]
 do
     echo $a
     ./qemu-boot.sh
-    a=`expr $a + 1`
+    a=$(expr $a + 1)
 done
