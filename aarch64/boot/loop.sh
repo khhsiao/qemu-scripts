@@ -11,7 +11,6 @@ ITERATION=$1
 a=0
 while [ $a -lt $ITERATION ]
 do
-    echo $a
+    echo $((a = a + 1))
     ./qemu-boot.sh
-    a=$(expr $a + 1)
 done
